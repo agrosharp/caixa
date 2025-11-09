@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Fluxo de Caixa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            background-color: #2196F3;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        #authButton {
+            display: block;              /* permite centralizar com margin */
+            margin: 20px auto;           /* centraliza horizontalmente */
+            font-size: 15px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: none;                /* remove a borda */
+            color: #ffffff;
+            background-color: rgb(135, 147, 160);
+        }
+
+        .balance-pai {
+            padding: 8px 12px;
+            border-radius: 4px;
+            color: #333;
+            background-color: white;
+        }
+
+        .balance {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .balance-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            background-color: white;
+            color: #333;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+table {
+    width: 100%;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-collapse: collapse; /* opcional, só pra ficar mais bonito */
+}
+
+.table-wrapper {
+    max-height: calc(100dvh - 125px);
+    overflow-y: auto;
+}
+
+/* Cabeçalho fixo no topo da área rolável da tabela */
+.table-wrapper thead th {
+    position: sticky;
+    top: 0;
+    background-color: #1976D2; /* reforça fundo sólido */
+    z-index: 3;
+}
+
+.table-wrapper tbody .total-row td {
+    position: sticky;
+    bottom: 0;
+    background-color: #e3f2fd; /* nova cor de fundo (azul clarinho, por exemplo) */
+    color: #0d47a1;            /* cor do texto (opcional) */
+    font-weight: 600;          /* mantém destaque */
+    z-index: 3;
+    border-top: 1px solid #bbdefb; /* separador visual opcional */
+}
+
+
+#table-entradas th:nth-child(2),
+#table-saidas th:nth-child(2),
+/* Coluna Valor: células (2ª coluna) */
+#table-entradas td:nth-child(2),
+#table-saidas td:nth-child(2) {
+    white-space: nowrap;    /* não quebra linha */
+}
+
+
+/* Container do gráfico ocupando a área útil da tela */
+#projetosChartWrapper {
+    height: calc(100dvh - 140px);
+    padding: 10px;
+}
+
+/* Canvas preenche totalmente o wrapper */
+#projetosChart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+        thead {
+            background-color: #1976D2;
+            color: white;
+        }
+
+        th {
+            padding: 12px 8px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .total-row {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+
+        .valor-positivo {
+            color: #4CAF50;
+        }
+
+        .valor-negativo {
+            color: #f44336;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            display: flex;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+            z-index: 3;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: none;
+            color: #666;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-top: 3px solid transparent;
+        }
+
+        .tab-button.active {
+            color: #2196F3;
+            border-top-color: #2196F3;
+            font-weight: 600;
+        }
+
+        .tab-button:active {
+            background-color: #f5f5f5;
+        }
+
+        @media (max-width: 480px) {
+            th, td {
+                padding: 10px 6px;
+                font-size: 13px;
+            }
+
+            .balance {
+                font-size: 16px;
+            }
+
+            .filter-select {
+                font-size: 13px;
+                padding: 6px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="balance-pai">
+            <div class="balance-label">Balanço</div>
+            <div class="balance" id="balance">R$ 0,00</div>
+        </div>
+        <select class="filter-select" id="filter">
+            <option value="">Todos</option>
+        </select>
+    </div>
+
+    <div class="content">
+        <button id="authButton" disabled>
+            Carregando dados...
+        </button>
+        <div id="tab-entradas" class="tab-content active">
+            <div class="table-wrapper">
+                <table id="table-entradas">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Valor</th>
+                            <th>Descrição</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-saidas" class="tab-content">
+            <div class="table-wrapper">
+                <table id="table-saidas">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Valor</th>
+                            <th>Descrição</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-projetos" class="tab-content">
+            <div class="empty-state">Em desenvolvimento...</div>
+        </div>
+
+        <div id="tab-projecao" class="tab-content">
+            <div class="empty-state">Em desenvolvimento...</div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="tab-button active" data-tab="entradas">Entradas</button>
+        <button class="tab-button" data-tab="saidas">Saídas</button>
+        <button class="tab-button" data-tab="projetos">Projetos</button>
+        <button class="tab-button" data-tab="projecao">Projeção</button>
+    </div>
+<script>
+    /********************************************
+     * CONFIGURAÇÃO - PREENCHA ESTES CAMPOS
+     ********************************************/
+    const CLIENT_ID   = "163634037411-2dtla9mb66kmjovrk8j3ialnk6q4rg4j.apps.googleusercontent.com";
+    const API_KEY     = "AIzaSyCP839P4CNWHMYhwsvpZJVb-_k74xSyRsU";
+    const SHEET_ID    = "1hjxWFmlfGXnL3UJV03zZNe7uKFwZg4GBxutsaC1Vci0";
+    const SHEET_RANGE = "Página1!A:G"; // Aba e colunas onde estão: Data, Tipo, Valor, Descrição, Projeto, Conta Bancária, Data Lançamento
+
+    const DISCOVERY_DOC = "https://sheets.googleapis.com/$discovery/rest?version=v4";
+    const SCOPES        = "https://www.googleapis.com/auth/spreadsheets.readonly";
+
+  // Chave usada no localStorage para lembrar o token
+  const TOKEN_STORAGE_KEY = "fluxo_caixa_gsheets_token_v1";
+
+  /********************************************
+   * ESTADO GLOBAL
+   ********************************************/
+  let tokenClient;
+  let gapiInited = false;
+  let gisInited  = false;
+  let domReady   = false;
+
+  let entradas = [];
+  let saidas  = [];
+
+  /********************************************
+   * FUNÇÕES DE UI (BOTÃO + CONTEÚDO)
+   ********************************************/
+  function getAuthButton() {
+    return document.getElementById("authButton");
+  }
+
+  function showButtonLogin() {
+    const btn = getAuthButton();
+    if (!btn) return;
+    btn.disabled = false;
+    btn.textContent = "Login";
+    btn.style.cursor = 'pointer';
+    btn.style.backgroundColor = 'rgb(30, 124, 225)';
+  }
+
+  function showButtonLoading() {
+    const btn = getAuthButton();
+    if (!btn) return;
+    btn.disabled = true;
+    btn.textContent = "Carregando dados...";
+    btn.style.backgroundColor = 'rgb(135, 147, 160)';
+  }
+
+  function hideButton() {
+    const btn = getAuthButton();
+    if (!btn) return;
+    btn.style.display = "none";
+  }
+
+  function hideContent() {
+    // Esconde saldo e abas/tabelas até os dados carregarem
+    const balance = document.getElementById("balance");
+    if (balance) {
+      const card = balance.closest(".card") || balance;
+      if (card) card.style.color = "white";
+    }
+    document.querySelectorAll(".tab-content").forEach(el => {
+      el.style.display = "none";
+    });
+  }
+
+  function showContent() {
+    // Mostra saldo e abas/tabelas após dados carregados
+    const balance = document.getElementById("balance");
+    if (balance) {
+      const card = balance.closest(".card") || balance;
+      if (card) card.style.color = "";
+    }
+    document.querySelectorAll(".tab-content").forEach(el => {
+      el.style.display = "";
+    });
+  }
+
+  /********************************************
+   * UTILITÁRIOS DE TOKEN (localStorage)
+   ********************************************/
+  function saveTokenFromResponse(resp) {
+    try {
+      if (!resp || !resp.access_token) return;
+      const expiresIn = resp.expires_in || 3500; // segundos
+      const expiresAt = Date.now() + expiresIn * 1000;
+
+      const stored = {
+        access_token: resp.access_token,
+        expires_at: expiresAt,
+        token_type: resp.token_type || "Bearer",
+        scope: resp.scope || SCOPES
+      };
+
+      localStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(stored));
+    } catch (e) {
+      console.warn("Não foi possível salvar o token:", e);
+    }
+  }
+
+  function loadValidToken() {
+    try {
+      const raw = localStorage.getItem(TOKEN_STORAGE_KEY);
+      if (!raw) return null;
+
+      const token = JSON.parse(raw);
+      if (!token.access_token || !token.expires_at) {
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
+        return null;
+      }
+
+      if (Date.now() >= token.expires_at) {
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
+        return null;
+      }
+
+      return {
+        access_token: token.access_token,
+        token_type: token.token_type || "Bearer",
+        scope: token.scope || SCOPES
+      };
+    } catch (e) {
+      console.warn("Não foi possível ler o token salvo:", e);
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      return null;
+    }
+  }
+
+  function clearStoredToken() {
+    try {
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+    } catch (e) {}
+    if (window.gapi && gapi.client) {
+      gapi.client.setToken(null);
+    }
+  }
+
+  /********************************************
+   * CARREGAR SCRIPTS EXTERNOS
+   ********************************************/
+  function loadScript(src, onload) {
+    const s = document.createElement("script");
+    s.src = src;
+    s.async = true;
+    s.defer = true;
+    if (onload) s.onload = onload;
+    document.head.appendChild(s);
+  }
+
+  // gapi.js carregado
+  function gapiLoaded() {
+    if (!window.gapi) {
+      console.error("gapi não carregado");
+      return;
+    }
+    gapi.load("client", async () => {
+      try {
+        await gapi.client.init({
+          apiKey: API_KEY,
+          discoveryDocs: [DISCOVERY_DOC],
+        });
+        gapiInited = true;
+
+        // Aplica token salvo se existir
+        const saved = loadValidToken();
+        if (saved) {
+          gapi.client.setToken(saved);
+        }
+
+        maybeStart();
+      } catch (err) {
+        console.error("Erro ao inicializar gapi:", err);
+        exibirErro("Erro ao inicializar Google API.");
+        showButtonLogin();
+      }
+    });
+  }
+
+  // Google Identity Services carregado
+  function gisLoaded() {
+    if (!window.google || !google.accounts || !google.accounts.oauth2) {
+      console.error("Google Identity Services não carregado");
+      return;
+    }
+
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: SCOPES,
+      callback: () => {}, // definido dinamicamente
+    });
+
+    gisInited = true;
+    maybeStart();
+  }
+
+  /********************************************
+   * INÍCIO DO FLUXO
+   * - Se já tiver token válido -> carrega automaticamente.
+   * - Senão -> mostra botão "Login".
+   ********************************************/
+  function maybeStart() {
+    if (!domReady || !gapiInited || !gisInited) return;
+
+    const saved = loadValidToken();
+    hideContent();
+
+    if (saved) {
+      // Tenta carregar automaticamente com token salvo
+      gapi.client.setToken(saved);
+      showButtonLoading();
+      carregarDados()
+        .then(() => {
+          hideButton();
+          showContent();
+        })
+        .catch((err) => {
+          console.error("Falha com token salvo, limpando:", err);
+          clearStoredToken();
+          hideContent();
+          showButtonLogin();
+        });
+    } else {
+      // Precisa logar
+      showButtonLogin();
+    }
+  }
+
+  /********************************************
+   * FLUXO DE AUTENTICAÇÃO (CLIQUES NO BOTÃO)
+   ********************************************/
+  async function handleAuthClick() {
+    const saved = loadValidToken();
+
+    // 1) Se por acaso tem token válido salvo, tenta direto
+    if (saved) {
+      gapi.client.setToken(saved);
+      showButtonLoading();
+      hideContent();
+      try {
+        await carregarDados();
+        hideButton();
+        showContent();
+        return;
+      } catch (err) {
+        console.error("Erro usando token salvo no clique:", err);
+        clearStoredToken();
+        hideContent();
+        showButtonLogin();
+        return;
+      }
+    }
+
+    // 2) Fluxo normal OAuth
+    if (!tokenClient) {
+      exibirErro("Serviço de autenticação não inicializado.");
+      return;
+    }
+
+    showButtonLoading();
+    hideContent();
+
+    tokenClient.callback = async (resp) => {
+      if (resp.error) {
+        console.error(resp);
+        hideContent();
+        showButtonLogin();
+        return;
+      }
+
+      saveTokenFromResponse(resp);
+
+      try {
+        await carregarDados();
+        hideButton();
+        showContent();
+      } catch (err) {
+        console.error("Erro ao carregar dados após login:", err);
+        clearStoredToken();
+        hideContent();
+        showButtonLogin();
+      }
+    };
+
+    const existing = gapi.client.getToken();
+    if (!existing) {
+      tokenClient.requestAccessToken({ prompt: "consent" });
+    } else {
+      tokenClient.requestAccessToken({ prompt: "" });
+    }
+  }
+
+  /********************************************
+   * LEITURA DA PLANILHA
+   ********************************************/
+  async function carregarDados() {
+    const resp = await gapi.client.sheets.spreadsheets.values.get({
+      spreadsheetId: SHEET_ID,
+      range: SHEET_RANGE,
+    });
+
+    const values = resp.result.values || [];
+    if (values.length < 2) {
+      throw new Error("Nenhum dado encontrado na planilha.");
+    }
+
+    const header = values[0];
+    const linhas = values.slice(1);
+
+    const rows = linhas.map(row => {
+      const obj = {};
+      header.forEach((colName, idx) => {
+        obj[colName] = row[idx] || "";
+      });
+      return obj;
+    });
+
+    processarDados(rows);
+    popularFiltros();
+    atualizarVisualizacao();
+    atualizarGraficoProjetos(); 
+  }
+
+  /********************************************
+   * PROCESSA ENTRADAS / SAÍDAS
+   * Colunas: Data, Tipo, Valor, Descrição, Projeto,
+   *          Conta Bancária, Data Lançamento (ignorada)
+   ********************************************/
+  function processarDados(rows) {
+    entradas = [];
+    saidas  = [];
+
+    rows.forEach(row => {
+      const tipoBruto = (row["Tipo"] || "").toString().trim().toLowerCase();
+      const data      = (row["Data"] || "").toString().trim();
+      let valorStr    = (row["Valor"] || "").toString().trim();
+      const descricao = row["Descrição"] || row["Descricao"] || "";
+      const projeto   = row["Projeto"] || "Sem projeto";
+      const conta     = row["Conta Bancária"] || row["Conta bancaria"] || row["Conta"] || "Não informado";
+
+      if (!tipoBruto || !data || !valorStr) return;
+
+      // Trata formato brasileiro (1.234,56)
+      valorStr = valorStr.replace(/\./g, "").replace(",", ".");
+      const valor = parseFloat(valorStr);
+      if (isNaN(valor)) return;
+
+      const item = { data, valor, descricao, projeto, conta };
+
+      if (tipoBruto.startsWith("e")) {
+        entradas.push(item);
+      } else if (tipoBruto.startsWith("s")) {
+        saidas.push(item);
+      }
+    });
+  }
+
+  /********************************************
+   * UI / RENDERIZAÇÃO
+   ********************************************/
+    function formatarValor(valor) {
+        if (isNaN(valor)) valor = 0;
+
+        const [inteiro, decimal] = valor.toFixed(2).split(".");
+        const inteiroComPontos = inteiro.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+        return "R$ " + inteiroComPontos + "," + decimal;
+    }
+
+  function renderizarTabela(tipo, dados) {
+    const tbody = document.querySelector(`#table-${tipo} tbody`);
+    if (!tbody) return 0;
+
+    tbody.innerHTML = "";
+
+    if (!dados || dados.length === 0) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td colspan="3" style="text-align: center; padding: 20px; color: #999;">
+          Nenhum registro encontrado
+        </td>`;
+      tbody.appendChild(tr);
+      return 0;
+    }
+
+    let total = 0;
+
+    dados.forEach(item => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${item.data}</td>
+        <td class="${tipo === "entradas" ? "valor-positivo" : "valor-negativo"}">
+          ${formatarValor(item.valor)}
+        </td>
+        <td>${item.descricao}</td>
+      `;
+      tbody.appendChild(tr);
+      total += item.valor;
+    });
+
+    const trTotal = document.createElement("tr");
+    trTotal.className = "total-row";
+    trTotal.innerHTML = `
+      <td>Total</td>
+      <td class="${tipo === "entradas" ? "valor-positivo" : "valor-negativo"}" colspan="2">
+        ${formatarValor(total)}
+      </td>
+    `;
+    tbody.appendChild(trTotal);
+
+    return total;
+  }
+
+  function filtrarDados(dados, filtro) {
+    if (!filtro) return dados;
+    const [tipo, valor] = filtro.split(":");
+    if (!tipo || !valor) return dados;
+
+    if (tipo === "projeto") {
+      return dados.filter(i => i.projeto === valor);
+    }
+    if (tipo === "conta") {
+      return dados.filter(i => i.conta === valor);
+    }
+    return dados;
+  }
+
+  function atualizarVisualizacao() {
+    const filterSelect = document.getElementById("filter");
+    const filtro = filterSelect ? filterSelect.value : "";
+
+    const entradasFiltradas = filtrarDados(entradas, filtro);
+    const saidasFiltradas   = filtrarDados(saidas, filtro);
+
+    const totalEntradas = renderizarTabela("entradas", entradasFiltradas);
+    const totalSaidas   = renderizarTabela("saidas", saidasFiltradas);
+
+    const balanco = totalEntradas - totalSaidas;
+
+    const balanceElement = document.getElementById("balance");
+    if (balanceElement) {
+      balanceElement.textContent = formatarValor(balanco);
+      balanceElement.classList.remove("valor-positivo", "valor-negativo");
+      balanceElement.classList.add(balanco >= 0 ? "valor-positivo" : "valor-negativo");
+    }
+  }
+
+  function popularFiltros() {
+    const filterSelect = document.getElementById("filter");
+    if (!filterSelect) return;
+
+    filterSelect.innerHTML = '<option value="">Todos</option>';
+
+    const todos = [...entradas, ...saidas];
+
+    const projetos = [...new Set(todos.map(i => i.projeto).filter(Boolean))].sort();
+    const contas   = [...new Set(todos.map(i => i.conta).filter(Boolean))].sort();
+
+    projetos.forEach(projeto => {
+      const option = document.createElement("option");
+      option.value = `projeto:${projeto}`;
+      option.textContent = `Projeto: ${projeto}`;
+      filterSelect.appendChild(option);
+    });
+
+    contas.forEach(conta => {
+      const option = document.createElement("option");
+      option.value = `conta:${conta}`;
+      option.textContent = `Conta: ${conta}`;
+      filterSelect.appendChild(option);
+    });
+  }
+
+  function exibirErro(msg) {
+    console.error(msg);
+    ["entradas", "saidas"].forEach(tipo => {
+      const tbody = document.querySelector(`#table-${tipo} tbody`);
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="3" style="text-align: center; padding: 20px; color: #f44336;">
+              ${msg}
+            </td>
+          </tr>`;
+      }
+    });
+
+    const balanceElement = document.getElementById("balance");
+    if (balanceElement) {
+      balanceElement.textContent = "R$ 0,00";
+      balanceElement.classList.remove("valor-positivo", "valor-negativo");
+    }
+  }
+
+  /********************************************
+   * INICIALIZAÇÃO DA UI
+   ********************************************/
+  function inicializarUI() {
+    // Tabs
+    document.querySelectorAll(".tab-button").forEach(button => {
+      button.addEventListener("click", () => {
+        const tabName = button.dataset.tab;
+
+        document.querySelectorAll(".tab-button")
+          .forEach(btn => btn.classList.remove("active"));
+        document.querySelectorAll(".tab-content")
+          .forEach(content => content.classList.remove("active"));
+
+        button.classList.add("active");
+        const tabContent = document.getElementById(`tab-${tabName}`);
+        if (tabContent) tabContent.classList.add("active");
+      });
+    });
+
+    // Filtro
+    const filterSelect = document.getElementById("filter");
+    if (filterSelect) {
+      filterSelect.addEventListener("change", atualizarVisualizacao);
+    }
+
+    // Botão Login
+    const btn = getAuthButton();
+    if (btn) {
+      btn.addEventListener("click", handleAuthClick);
+      // Texto controlado pelas funções de estado (Login / Carregando dados...)
+    }
+
+    // Conteúdo começa oculto
+    hideContent();
+  }
+
+  /********************************************
+   * BOOTSTRAP
+   ********************************************/
+  document.addEventListener("DOMContentLoaded", () => {
+    domReady = true;
+    inicializarUI();
+
+    // Carrega as libs do Google
+    loadScript("https://apis.google.com/js/api.js", gapiLoaded);
+    loadScript("https://accounts.google.com/gsi/client", gisLoaded);
+
+    // maybeStart será chamado pelos loaders quando tudo estiver pronto
+  });
+
+  let projetosChartInstance = null;
+
+  function calcularLucroPorProjeto() {
+    const mapa = {};
+
+    // Soma entradas por projeto
+    entradas.forEach(item => {
+      const projeto = item.projeto || "Sem projeto";
+      if (!mapa[projeto]) {
+        mapa[projeto] = { entradas: 0, saidas: 0 };
+      }
+      mapa[projeto].entradas += item.valor;
+    });
+
+    // Soma saídas por projeto
+    saidas.forEach(item => {
+      const projeto = item.projeto || "Sem projeto";
+      if (!mapa[projeto]) {
+        mapa[projeto] = { entradas: 0, saidas: 0 };
+      }
+      mapa[projeto].saidas += item.valor;
+    });
+
+    const labels = [];
+    const lucros = [];
+
+    Object.keys(mapa).forEach(projeto => {
+      const totalEntradas = mapa[projeto].entradas;
+      const totalSaidas   = mapa[projeto].saidas;
+      const lucro         = totalEntradas - totalSaidas;
+
+      // Só mostra projetos que tiveram algum movimento
+      if (totalEntradas !== 0 || totalSaidas !== 0) {
+        labels.push(projeto);
+        lucros.push(lucro);
+      }
+    });
+
+    return { labels, lucros };
+  }
+
+  // Carrega Chart.js via CDN se ainda não carregou
+  function loadChartJs(callback) {
+    if (window.Chart) {
+      callback();
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/chart.js";
+    s.onload = callback;
+    document.head.appendChild(s);
+  }
+
+  function atualizarGraficoProjetos() {
+    const tabProjetos = document.getElementById("tab-projetos");
+    if (!tabProjetos) return;
+
+    const { labels, lucros } = calcularLucroPorProjeto();
+
+    // Se não houver dados, exibe mensagem simples
+    if (!labels.length) {
+      tabProjetos.innerHTML = '<div class="empty-state">Sem dados de projetos para exibir.</div>';
+      if (projetosChartInstance) {
+        projetosChartInstance.destroy();
+        projetosChartInstance = null;
+      }
+      return;
+    }
+
+  // Garante que exista um canvas para o gráfico
+    let canvas = document.getElementById("projetosChart");
+    if (!canvas) {
+    tabProjetos.innerHTML = ""; // limpa "Em desenvolvimento..."
+
+    const wrapper = document.createElement("div");
+    wrapper.id = "projetosChartWrapper";
+
+    canvas = document.createElement("canvas");
+    canvas.id = "projetosChart";
+
+    wrapper.appendChild(canvas);
+    tabProjetos.appendChild(wrapper);
+    }
+
+  // Carrega Chart.js e renderiza
+  loadChartJs(() => {
+    const ctx = canvas.getContext("2d");
+
+    if (projetosChartInstance) {
+      projetosChartInstance.destroy();
+    }
+
+    projetosChartInstance = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "Lucro por projeto (R$)",
+          data: lucros,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const valor = context.parsed.y || 0;
+                return formatarValor(valor);
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              maxRotation: 45,
+              minRotation: 0,
+            }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return formatarValor(value);
+              }
+            }
+          }
+        }
+      }
+    });
+  });
+}
+
+
+
+</script>

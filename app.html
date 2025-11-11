@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="icon" type="image/png" href="logo_agrosharp.png">
     <title>Fluxo de Caixa</title>
     <style>
         * {
@@ -18,7 +19,8 @@
 
         .header {
             background-color: #2196F3;
-            padding: 15px;
+            padding: 6px;
+            padding-bottom: 7px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -40,7 +42,8 @@
         }
 
         .balance-pai {
-            padding: 8px 12px;
+            padding: 2px 8px;
+            padding-bottom: 4px;
             border-radius: 4px;
             color: #333;
             background-color: white;
@@ -57,13 +60,19 @@
         }
 
         .filter-select {
-            padding: 8px 12px;
+            padding: 6px 6px;
             border: none;
             border-radius: 4px;
             background-color: white;
             color: #333;
             font-size: 14px;
             cursor: pointer;
+        }
+
+        .titulo-select{
+          padding-bottom: 2px;
+          font-size: 14px;
+          color: rgb(255, 255, 255);
         }
 
         
@@ -84,7 +93,7 @@ table {
 }
 
 .table-wrapper {
-    max-height: calc(100dvh - 125px);
+    max-height: calc(100dvh - 108px);
     overflow-y: auto;
 }
 
@@ -118,7 +127,7 @@ table {
 
 /* Container do gráfico ocupando a área útil da tela */
 #projetosChartWrapper {
-    height: calc(100dvh - 140px);
+    height: calc(100dvh - 123px);
     padding: 10px;
 }
 
@@ -127,6 +136,18 @@ table {
     width: 100% !important;
     height: 100% !important;
 }
+
+
+#projecaoChartWrapper {
+    height: calc(100dvh - 123px);
+    padding: 10px;
+}
+
+#projecaoChart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
 
         thead {
             background-color: #1976D2;
@@ -225,9 +246,18 @@ table {
             <div class="balance-label">Balanço</div>
             <div class="balance" id="balance">R$ 0,00</div>
         </div>
-        <select class="filter-select" id="filter">
-            <option value="">Todos</option>
-        </select>
+        <div class="filtro-pai">
+          <div class="titulo-select">Filtro</div>
+          <select class="filter-select" id="filter">
+              <option value="">Todos</option>
+          </select>
+        </div>
+        <div class="filtro-pai">
+          <div class="titulo-select">Ano</div>
+          <select class="filter-select" id="filter-ano">
+              <option value="">Todos</option>
+          </select>
+        </div>
     </div>
 
     <div class="content">
@@ -286,7 +316,9 @@ table {
     const CLIENT_ID   = "163634037411-2dtla9mb66kmjovrk8j3ialnk6q4rg4j.apps.googleusercontent.com";
     const API_KEY     = "AIzaSyCP839P4CNWHMYhwsvpZJVb-_k74xSyRsU";
     const SHEET_ID    = "1hjxWFmlfGXnL3UJV03zZNe7uKFwZg4GBxutsaC1Vci0";
+    const SHEET_PROJECAO_ID = "1vLQuPR0Mss1GPP3iU3wCcUtaXe69wqKk-U4XWBjjSpM";
     const SHEET_RANGE = "Página1!A:G"; // Aba e colunas onde estão: Data, Tipo, Valor, Descrição, Projeto, Conta Bancária, Data Lançamento
+    const SHEET_PROJECAO_RANGE = "Página1!A:B";
 
     const DISCOVERY_DOC = "https://sheets.googleapis.com/$discovery/rest?version=v4";
     const SCOPES        = "https://www.googleapis.com/auth/spreadsheets.readonly";
@@ -304,6 +336,9 @@ table {
 
   let entradas = [];
   let saidas  = [];
+  
+  let projecaoSeries = [];          // { data, valor } vindo da 2ª planilha
+  let projecaoChartInstance = null; // instância do Chart.js na aba Projeção
 
   /********************************************
    * FUNÇÕES DE UI (BOTÃO + CONTEÚDO)
@@ -576,38 +611,137 @@ table {
    * LEITURA DA PLANILHA
    ********************************************/
   async function carregarDados() {
-    const resp = await gapi.client.sheets.spreadsheets.values.get({
-      spreadsheetId: SHEET_ID,
-      range: SHEET_RANGE,
-    });
+  // 1) Planilha principal (entradas/saídas)
+  const resp = await gapi.client.sheets.spreadsheets.values.get({
+    spreadsheetId: SHEET_ID,
+    range: SHEET_RANGE,
+  });
 
-    const values = resp.result.values || [];
-    if (values.length < 2) {
-      throw new Error("Nenhum dado encontrado na planilha.");
-    }
-
-    const header = values[0];
-    const linhas = values.slice(1);
-
-    const rows = linhas.map(row => {
-      const obj = {};
-      header.forEach((colName, idx) => {
-        obj[colName] = row[idx] || "";
-      });
-      return obj;
-    });
-
-    processarDados(rows);
-    popularFiltros();
-    atualizarVisualizacao();
-    atualizarGraficoProjetos(); 
+  const values = resp.result.values || [];
+  if (values.length < 2) {
+    throw new Error("Nenhum dado encontrado na planilha.");
   }
+
+  const header = values[0];
+  const linhas = values.slice(1);
+
+  const rows = linhas.map(row => {
+    const obj = {};
+    header.forEach((colName, idx) => {
+      obj[colName] = row[idx] || "";
+    });
+    return obj;
+  });
+
+  processarDados(rows);
+  popularFiltros();
+  atualizarVisualizacao();  // isso já chama atualizarGraficoProjetos() por dentro
+
+  // 2) Planilha de projeção (Data, Balanço)
+  projecaoSeries = [];
+  if (SHEET_PROJECAO_ID && SHEET_PROJECAO_RANGE) {
+    try {
+      const respProj = await gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId: SHEET_PROJECAO_ID,
+        range: SHEET_PROJECAO_RANGE,
+      });
+
+      const vals = respProj.result.values || [];
+      if (vals.length > 1) {
+        const header2 = vals[0];
+        const idxData    = header2.indexOf("Data");
+        const idxBalanco = header2.indexOf("Balanço");
+
+        if (idxData !== -1 && idxBalanco !== -1) {
+          projecaoSeries = vals.slice(1)
+            .map(row => {
+              const dataStr = (row[idxData] || "").toString().trim();
+              let valStr    = (row[idxBalanco] || "").toString().trim();
+              if (!dataStr || !valStr) return null;
+
+              // Trata número brasileiro se vier como texto
+              valStr = valStr.replace(/\./g, "").replace(",", ".");
+              const valor = parseFloat(valStr);
+              if (isNaN(valor)) return null;
+
+              return { data: dataStr, valor };
+            })
+            .filter(p => p && p.data);
+        }
+      }
+    } catch (err) {
+      console.warn("Não foi possível carregar planilha de projeção:", err);
+      projecaoSeries = [];
+    }
+  }
+
+  // 3) Atualiza o gráfico da aba Projeção
+  atualizarGraficoProjecao();
+}
 
   /********************************************
    * PROCESSA ENTRADAS / SAÍDAS
    * Colunas: Data, Tipo, Valor, Descrição, Projeto,
    *          Conta Bancária, Data Lançamento (ignorada)
    ********************************************/
+
+  const MESES_CURTOS = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+
+  function parseDataString(dateStr) {
+    if (!dateStr) return null;
+
+    // Tenta formatos comuns: dd/mm/yyyy ou yyyy-mm-dd
+    const partes = dateStr.split(/[\/\-]/);
+    if (partes.length === 3) {
+      let dia, mes, ano;
+
+      if (partes[0].length === 4) {
+        // yyyy-mm-dd
+        ano = parseInt(partes[0], 10);
+        mes = parseInt(partes[1], 10) - 1;
+        dia = parseInt(partes[2], 10);
+      } else {
+        // dd/mm/yyyy
+        dia = parseInt(partes[0], 10);
+        mes = parseInt(partes[1], 10) - 1;
+        ano = parseInt(partes[2], 10);
+      }
+
+      if (!isNaN(ano) && !isNaN(mes) && !isNaN(dia)) {
+        return new Date(ano, mes, dia);
+      }
+    }
+
+    // fallback tosco se vier em outro formato, tenta pegar yyyy-mm-dd
+    const m = dateStr.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (m) {
+      const ano = parseInt(m[1], 10);
+      const mes = parseInt(m[2], 10) - 1;
+      const dia = parseInt(m[3], 10);
+      return new Date(ano, mes, dia);
+    }
+
+    return null;
+  }
+
+
+  function extrairAno(dataStr) {
+    if (!dataStr) return "";
+
+    // Aceita formatos tipo "dd/mm/yyyy", "yyyy-mm-dd", etc.
+    const partes = dataStr.split(/[\/\-]/);
+    if (partes.length === 3) {
+      // Se vier "dd/mm/yyyy" -> ano é a 3ª parte
+      // Se vier "yyyy-mm-dd" -> ano é a 1ª parte (tratamos os dois)
+      let ano = partes[2].length === 4 ? partes[2] : partes[0];
+      return /^\d{4}$/.test(ano) ? ano : "";
+    }
+
+    const match = dataStr.match(/(\d{4})/);
+    return match ? match[1] : "";
+  }
+
+
   function processarDados(rows) {
     entradas = [];
     saidas  = [];
@@ -627,7 +761,9 @@ table {
       const valor = parseFloat(valorStr);
       if (isNaN(valor)) return;
 
-      const item = { data, valor, descricao, projeto, conta };
+      const ano = extrairAno(data);
+
+      const item = { data, ano, valor, descricao, projeto, conta };
 
       if (tipoBruto.startsWith("e")) {
         entradas.push(item);
@@ -636,6 +772,30 @@ table {
       }
     });
   }
+
+
+function aplicarFiltrosCombinados(dados, filtroProjetoConta, filtroAno) {
+  return dados.filter(item => {
+    let okProjConta = true;
+    let okAno = true;
+
+    if (filtroProjetoConta) {
+      const [tipo, valor] = filtroProjetoConta.split(":");
+      if (tipo === "projeto") {
+        okProjConta = item.projeto === valor;
+      } else if (tipo === "conta") {
+        okProjConta = item.conta === valor;
+      }
+    }
+
+    if (filtroAno) {
+      okAno = item.ano === filtroAno;
+    }
+
+    return okProjConta && okAno;
+  });
+}
+
 
   /********************************************
    * UI / RENDERIZAÇÃO
@@ -707,33 +867,46 @@ table {
     return dados;
   }
 
-  function atualizarVisualizacao() {
-    const filterSelect = document.getElementById("filter");
-    const filtro = filterSelect ? filterSelect.value : "";
 
-    const entradasFiltradas = filtrarDados(entradas, filtro);
-    const saidasFiltradas   = filtrarDados(saidas, filtro);
+function atualizarVisualizacao() {
+  const filterSelect = document.getElementById("filter");        // projeto/conta
+  const filterAnoSelect = document.getElementById("filter-ano"); // ano
 
-    const totalEntradas = renderizarTabela("entradas", entradasFiltradas);
-    const totalSaidas   = renderizarTabela("saidas", saidasFiltradas);
+  const filtroProjetoConta = filterSelect ? filterSelect.value : "";
+  const filtroAno = filterAnoSelect ? filterAnoSelect.value : "";
 
-    const balanco = totalEntradas - totalSaidas;
+  const entradasFiltradas = aplicarFiltrosCombinados(entradas, filtroProjetoConta, filtroAno);
+  const saidasFiltradas   = aplicarFiltrosCombinados(saidas,   filtroProjetoConta, filtroAno);
 
-    const balanceElement = document.getElementById("balance");
-    if (balanceElement) {
-      balanceElement.textContent = formatarValor(balanco);
-      balanceElement.classList.remove("valor-positivo", "valor-negativo");
-      balanceElement.classList.add(balanco >= 0 ? "valor-positivo" : "valor-negativo");
-    }
+  const totalEntradas = renderizarTabela("entradas", entradasFiltradas);
+  const totalSaidas   = renderizarTabela("saidas", saidasFiltradas);
+
+  const balanco = totalEntradas - totalSaidas;
+
+  const balanceElement = document.getElementById("balance");
+  if (balanceElement) {
+    balanceElement.textContent = formatarValor(balanco);
+    balanceElement.classList.remove("valor-positivo", "valor-negativo");
+    balanceElement.classList.add(balanco >= 0 ? "valor-positivo" : "valor-negativo");
   }
 
-  function popularFiltros() {
-    const filterSelect = document.getElementById("filter");
-    if (!filterSelect) return;
+  // Atualiza também o gráfico de projetos com os mesmos filtros
+  atualizarGraficoProjetos();
+  atualizarGraficoProjecao();
+}
 
+
+
+
+function popularFiltros() {
+  const filterSelect = document.getElementById("filter");       // projeto/conta
+  const filterAnoSelect = document.getElementById("filter-ano"); // ano
+
+  const todos = [...entradas, ...saidas];
+
+  // ----- Filtro projeto/conta -----
+  if (filterSelect) {
     filterSelect.innerHTML = '<option value="">Todos</option>';
-
-    const todos = [...entradas, ...saidas];
 
     const projetos = [...new Set(todos.map(i => i.projeto).filter(Boolean))].sort();
     const contas   = [...new Set(todos.map(i => i.conta).filter(Boolean))].sort();
@@ -753,26 +926,24 @@ table {
     });
   }
 
-  function exibirErro(msg) {
-    console.error(msg);
-    ["entradas", "saidas"].forEach(tipo => {
-      const tbody = document.querySelector(`#table-${tipo} tbody`);
-      if (tbody) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="3" style="text-align: center; padding: 20px; color: #f44336;">
-              ${msg}
-            </td>
-          </tr>`;
-      }
-    });
+  // ----- Filtro ano -----
+  if (filterAnoSelect) {
+    filterAnoSelect.innerHTML = '<option value="">Todos</option>';
 
-    const balanceElement = document.getElementById("balance");
-    if (balanceElement) {
-      balanceElement.textContent = "R$ 0,00";
-      balanceElement.classList.remove("valor-positivo", "valor-negativo");
-    }
+    const anos = [...new Set(
+      todos
+        .map(i => i.ano)
+        .filter(ano => ano && /^\d{4}$/.test(ano))
+    )].sort();
+
+    anos.forEach(ano => {
+      const option = document.createElement("option");
+      option.value = ano;
+      option.textContent = ano;
+      filterAnoSelect.appendChild(option);
+    });
   }
+}
 
   /********************************************
    * INICIALIZAÇÃO DA UI
@@ -798,6 +969,11 @@ table {
     const filterSelect = document.getElementById("filter");
     if (filterSelect) {
       filterSelect.addEventListener("change", atualizarVisualizacao);
+    }
+
+    const filterAnoSelect = document.getElementById("filter-ano");
+    if (filterAnoSelect) {
+      filterAnoSelect.addEventListener("change", atualizarVisualizacao);
     }
 
     // Botão Login
@@ -827,44 +1003,40 @@ table {
 
   let projetosChartInstance = null;
 
-  function calcularLucroPorProjeto() {
-    const mapa = {};
 
-    // Soma entradas por projeto
-    entradas.forEach(item => {
-      const projeto = item.projeto || "Sem projeto";
-      if (!mapa[projeto]) {
-        mapa[projeto] = { entradas: 0, saidas: 0 };
-      }
-      mapa[projeto].entradas += item.valor;
-    });
+function calcularLucroPorProjeto(entradasFonte, saidasFonte) {
+  const mapa = {};
 
-    // Soma saídas por projeto
-    saidas.forEach(item => {
-      const projeto = item.projeto || "Sem projeto";
-      if (!mapa[projeto]) {
-        mapa[projeto] = { entradas: 0, saidas: 0 };
-      }
-      mapa[projeto].saidas += item.valor;
-    });
+  (entradasFonte || []).forEach(item => {
+    const projeto = item.projeto || "Sem projeto";
+    if (!mapa[projeto]) mapa[projeto] = { entradas: 0, saidas: 0 };
+    mapa[projeto].entradas += item.valor;
+  });
 
-    const labels = [];
-    const lucros = [];
+  (saidasFonte || []).forEach(item => {
+    const projeto = item.projeto || "Sem projeto";
+    if (!mapa[projeto]) mapa[projeto] = { entradas: 0, saidas: 0 };
+    mapa[projeto].saidas += item.valor;
+  });
 
-    Object.keys(mapa).forEach(projeto => {
-      const totalEntradas = mapa[projeto].entradas;
-      const totalSaidas   = mapa[projeto].saidas;
-      const lucro         = totalEntradas - totalSaidas;
+  const labels = [];
+  const lucros = [];
 
-      // Só mostra projetos que tiveram algum movimento
-      if (totalEntradas !== 0 || totalSaidas !== 0) {
-        labels.push(projeto);
-        lucros.push(lucro);
-      }
-    });
+  Object.keys(mapa).forEach(projeto => {
+    const totalEntradas = mapa[projeto].entradas;
+    const totalSaidas   = mapa[projeto].saidas;
+    const lucro         = totalEntradas - totalSaidas;
 
-    return { labels, lucros };
-  }
+    if (totalEntradas !== 0 || totalSaidas !== 0) {
+      labels.push(projeto);
+      lucros.push(lucro);
+    }
+  });
+
+  return { labels, lucros };
+}
+
+
 
   // Carrega Chart.js via CDN se ainda não carregou
   function loadChartJs(callback) {
@@ -878,27 +1050,33 @@ table {
     document.head.appendChild(s);
   }
 
-  function atualizarGraficoProjetos() {
-    const tabProjetos = document.getElementById("tab-projetos");
-    if (!tabProjetos) return;
+function atualizarGraficoProjetos() {
+  const tabProjetos = document.getElementById("tab-projetos");
+  if (!tabProjetos) return;
 
-    const { labels, lucros } = calcularLucroPorProjeto();
+  const filterSelect = document.getElementById("filter");
+  const filterAnoSelect = document.getElementById("filter-ano");
 
-    // Se não houver dados, exibe mensagem simples
-    if (!labels.length) {
-      tabProjetos.innerHTML = '<div class="empty-state">Sem dados de projetos para exibir.</div>';
-      if (projetosChartInstance) {
-        projetosChartInstance.destroy();
-        projetosChartInstance = null;
-      }
-      return;
+  const filtroProjetoConta = filterSelect ? filterSelect.value : "";
+  const filtroAno = filterAnoSelect ? filterAnoSelect.value : "";
+
+  const entradasFiltradas = aplicarFiltrosCombinados(entradas, filtroProjetoConta, filtroAno);
+  const saidasFiltradas   = aplicarFiltrosCombinados(saidas,   filtroProjetoConta, filtroAno);
+
+  const { labels, lucros } = calcularLucroPorProjeto(entradasFiltradas, saidasFiltradas);
+
+  if (!labels.length) {
+    tabProjetos.innerHTML = '<div class="empty-state">Sem dados de projetos para exibir.</div>';
+    if (projetosChartInstance) {
+      projetosChartInstance.destroy();
+      projetosChartInstance = null;
     }
+    return;
+  }
 
-  // Garante que exista um canvas para o gráfico
-    let canvas = document.getElementById("projetosChart");
-    if (!canvas) {
-    tabProjetos.innerHTML = ""; // limpa "Em desenvolvimento..."
-
+  let canvas = document.getElementById("projetosChart");
+  if (!canvas) {
+    tabProjetos.innerHTML = "";
     const wrapper = document.createElement("div");
     wrapper.id = "projetosChartWrapper";
 
@@ -907,9 +1085,8 @@ table {
 
     wrapper.appendChild(canvas);
     tabProjetos.appendChild(wrapper);
-    }
+  }
 
-  // Carrega Chart.js e renderiza
   loadChartJs(() => {
     const ctx = canvas.getContext("2d");
 
@@ -930,9 +1107,7 @@ table {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: {
-            display: false
-          },
+          legend: { display: false },
           tooltip: {
             callbacks: {
               label: function(context) {
@@ -963,6 +1138,184 @@ table {
   });
 }
 
+
+
+  function atualizarGraficoProjecao() {
+    const tabProjecao = document.getElementById("tab-projecao");
+    if (!tabProjecao) return;
+
+    if (!projecaoSeries || projecaoSeries.length === 0) {
+      tabProjecao.innerHTML = '<div class="empty-state">Sem dados de projeção para exibir.</div>';
+      if (projecaoChartInstance) {
+        projecaoChartInstance.destroy();
+        projecaoChartInstance = null;
+      }
+      return;
+    }
+
+    // --- aplica filtro de ano (a partir do ano selecionado) ---
+    const filterAnoSelect = document.getElementById("filter-ano");
+    const filtroAno = filterAnoSelect ? filterAnoSelect.value : "";
+
+    let seriesFiltrada = projecaoSeries;
+
+    if (filtroAno) {
+      const anoSel = parseInt(filtroAno, 10);
+      if (!isNaN(anoSel)) {
+        seriesFiltrada = projecaoSeries.filter(p => {
+          const dt = parseDataString(p.data);
+          return dt && dt.getFullYear() >= anoSel; // a partir do ano selecionado
+        });
+      }
+    }
+
+    if (!seriesFiltrada.length) {
+      tabProjecao.innerHTML = '<div class="empty-state">Sem dados de projeção para o ano selecionado.</div>';
+      if (projecaoChartInstance) {
+        projecaoChartInstance.destroy();
+        projecaoChartInstance = null;
+      }
+      return;
+    }
+
+    // --- garante container + canvas ---
+    let canvas = document.getElementById("projecaoChart");
+    if (!canvas) {
+      tabProjecao.innerHTML = "";
+
+      const wrapper = document.createElement("div");
+      wrapper.id = "projecaoChartWrapper";
+
+      canvas = document.createElement("canvas");
+      canvas.id = "projecaoChart";
+
+      wrapper.appendChild(canvas);
+      tabProjecao.appendChild(wrapper);
+    }
+
+    // --- monta labels, valores e flags de futuro com base na série filtrada ---
+    const labels  = seriesFiltrada.map(p => p.data);
+    const valores = seriesFiltrada.map(p => p.valor);
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    const isFutureFlags = labels.map(dataStr => {
+      const dt = parseDataString(dataStr);
+      return dt && dt > hoje; // ajuste para >= hoje se quiser incluir hoje como projeção
+    });
+
+    loadChartJs(() => {
+      const ctx = canvas.getContext("2d");
+
+      if (projecaoChartInstance) {
+        projecaoChartInstance.destroy();
+      }
+
+    projecaoChartInstance = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [
+        // Dataset REAL: linha contínua com futuro pontilhado
+        {
+          label: "Balanço",
+          data: valores,
+          borderColor: "#2196F3",
+          backgroundColor: "#2196F3",
+          tension: 0.25,
+          spanGaps: false,
+          pointRadius: 6,
+          pointHoverRadius: 10,
+          segment: {
+            // segmentos cujo ponto final é futuro ficam pontilhados
+            borderDash: ctx => {
+              const idx = ctx.p1DataIndex;
+              return isFutureFlags[idx] ? [5, 5] : undefined;
+            }
+          }
+        },
+
+        // LEGEND: Histórico (linha contínua)
+        {
+          label: "Histórico",
+          data: [],
+          borderColor: "#2196F3",
+          borderDash: [],
+          borderWidth: 3,
+          pointRadius: 0,
+          fill: false,
+        },
+
+        // LEGEND: Projeção (linha pontilhada)
+        {
+          label: "Projeção",
+          data: [NaN],
+          borderColor: "#2196F3",
+          borderDash: [5, 10],
+          borderWidth: 3,
+          pointRadius: 0,
+          fill: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          labels: {
+            filter: (legendItem) => (legendItem.datasetIndex !== 0), // esconde o dataset real da legenda           
+            boxWidth: 40,                  // compr. da "linha" na legenda
+            boxHeight: 0                  // altura pequena = parece só linha
+          }
+        },
+        tooltip: {
+          // mantém tooltip só do dataset real
+          filter: (ctx) => ctx.datasetIndex === 0,
+          callbacks: {
+            title: function(items) {
+              const raw = items[0].label || "";
+              const dt = parseDataString(raw);
+              if (!dt) return raw;
+              const mes = MESES_CURTOS[dt.getMonth()];
+              return `${mes}/${dt.getFullYear()}`;
+            },
+            label: function(context) {
+              const v = context.parsed.y || 0;
+              return formatarValor(v);
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            callback: function(value) {
+              const raw = this.getLabelForValue(value);
+              const dt = parseDataString(raw);
+              if (!dt) return raw;
+              const mes = MESES_CURTOS[dt.getMonth()];
+              return `${mes}/${dt.getFullYear()}`;
+            },
+            maxRotation: 45,
+            minRotation: 0,
+          }
+        },
+        y: {
+          beginAtZero: false,
+          ticks: {
+            callback: function(value) {
+              return formatarValor(value);
+            }
+          }
+        }
+      }
+    }
+  });
+  });
+}
 
 
 </script>

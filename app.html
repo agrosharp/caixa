@@ -19,7 +19,7 @@
 
         .header {
             background-color: #2196F3;
-            padding: 6px;
+            padding: 6px 20px;
             padding-bottom: 7px;
             display: flex;
             justify-content: space-between;
@@ -55,12 +55,8 @@
         }
 
         .balance-label {
-            font-size: 12px;
+            font-size: 13px;
             opacity: 0.9;
-        }
-
-        .filtro-pai{
-          margin-left: 7px;
         }
 
         .filter-select {
@@ -74,9 +70,9 @@
         }
 
         .titulo-select{
-          padding-bottom: 2px;
-          font-size: 14px;
-          color: rgb(255, 255, 255);
+            padding-bottom: 2px;
+            font-size: 14px;
+            color: rgb(255, 255, 255);
         }
 
         
@@ -88,70 +84,69 @@
             display: block;
         }
 
-table {
-    width: 100%;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    border-collapse: collapse; /* opcional, só pra ficar mais bonito */
-}
+        table {
+            width: 100%;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-collapse: collapse; /* opcional, só pra ficar mais bonito */
+        }
 
-.table-wrapper {
-    max-height: calc(100dvh - 108px);
-    overflow-y: auto;
-}
+        .table-wrapper {
+            max-height: calc(100dvh - 106px);
+            overflow-y: auto;
+        }
 
-/* Cabeçalho fixo no topo da área rolável da tabela */
-.table-wrapper thead th {
-    position: sticky;
-    top: 0;
-    background-color: #1976D2; /* reforça fundo sólido */
-    z-index: 3;
-}
+        /* Cabeçalho fixo no topo da área rolável da tabela */
+        .table-wrapper thead th {
+            position: sticky;
+            top: 0;
+            background-color: #1976D2; /* reforça fundo sólido */
+            z-index: 3;
+        }
 
-.table-wrapper tbody .total-row td {
-    position: sticky;
-    bottom: 0;
-    background-color: #e3f2fd; /* nova cor de fundo (azul clarinho, por exemplo) */
-    color: #0d47a1;            /* cor do texto (opcional) */
-    font-weight: 600;          /* mantém destaque */
-    z-index: 3;
-    border-top: 1px solid #bbdefb; /* separador visual opcional */
-}
-
-
-#table-entradas th:nth-child(2),
-#table-saidas th:nth-child(2),
-/* Coluna Valor: células (2ª coluna) */
-#table-entradas td:nth-child(2),
-#table-saidas td:nth-child(2) {
-    white-space: nowrap;    /* não quebra linha */
-}
+        .table-wrapper tbody .total-row td {
+            position: sticky;
+            bottom: 0;
+            background-color: #e3f2fd; /* nova cor de fundo (azul clarinho, por exemplo) */
+            color: #0d47a1;            /* cor do texto (opcional) */
+            font-weight: 600;          /* mantém destaque */
+            z-index: 3;
+            border-top: 1px solid #bbdefb; /* separador visual opcional */
+        }
 
 
-/* Container do gráfico ocupando a área útil da tela */
-#projetosChartWrapper {
-    height: calc(100dvh - 123px);
-    padding: 10px;
-}
-
-/* Canvas preenche totalmente o wrapper */
-#projetosChart {
-    width: 100% !important;
-    height: 100% !important;
-}
+        #table-entradas th:nth-child(2),
+        #table-saidas th:nth-child(2),
+        /* Coluna Valor: células (2ª coluna) */
+        #table-entradas td:nth-child(2),
+        #table-saidas td:nth-child(2) {
+            white-space: nowrap;    /* não quebra linha */
+        }
 
 
-#projecaoChartWrapper {
-    height: calc(100dvh - 123px);
-    padding: 10px;
-}
+        /* Container do gráfico ocupando a área útil da tela */
+        #projetosChartWrapper {
+            height: calc(100dvh - 123px);
+            padding: 10px;
+        }
 
-#projecaoChart {
-    width: 100% !important;
-    height: 100% !important;
-}
+        /* Canvas preenche totalmente o wrapper */
+        #projetosChart {
+            width: 100% !important;
+            height: 100% !important;
+        }
 
+
+        #projecaoChartWrapper {
+            height: calc(100dvh - 123px);
+            padding: 10px;
+        }
+
+        #projecaoChart {
+            width: 100% !important;
+            height: 100% !important;
+        }
 
         thead {
             background-color: #1976D2;
@@ -237,8 +232,12 @@ table {
                 font-size: 15px;
             }
 
+            .balance-label {
+                font-size: 12px;
+            }
+
             .titulo-select{
-              font-size: 12px;
+                font-size: 12px;
             }
 
             .filter-select {
@@ -251,14 +250,69 @@ table {
             }
             
             #projetosChartWrapper {
-                height: calc(100dvh - 112px);
+                height: calc(100dvh - 107px);
             }
 
 
             #projecaoChartWrapper {
-                height: calc(100dvh - 112px);
+                height: calc(100dvh - 107px);
             }
         }
+
+
+        @media (max-height: 480px) {
+            th, td {
+              padding: 4px 6px;
+              font-size: 13px;
+            }
+
+            .table-wrapper {
+              max-height: calc(100dvh - 40px);
+            }
+            
+            #projetosChartWrapper {
+              height: calc(100dvh - 40px);
+            }
+
+            #projecaoChartWrapper {
+              height: calc(100dvh - 32px);
+            }
+        
+            .balance-pai {
+              padding: 1px 8px;
+            }
+
+            .balance {
+              font-size: 10px;
+            }
+
+            .balance-label {
+              display: none;
+            }
+
+            .filtro-pai {
+              display: flex;
+            }
+
+            .filter-select {
+                padding: 1px 6px;
+                font-size: 10px;
+            }
+
+            .titulo-select{
+              display: none;
+            }
+               
+            .header {
+              padding: 1px 12px;
+            }
+
+            .tab-button {
+              padding: 4px;
+              font-size: 10px;
+          }
+        }
+
     </style>
 </head>
 <body>
@@ -337,9 +391,13 @@ table {
     const CLIENT_ID   = "163634037411-2dtla9mb66kmjovrk8j3ialnk6q4rg4j.apps.googleusercontent.com";
     const API_KEY     = "AIzaSyCP839P4CNWHMYhwsvpZJVb-_k74xSyRsU";
     const SHEET_ID    = "1hjxWFmlfGXnL3UJV03zZNe7uKFwZg4GBxutsaC1Vci0";
-    const SHEET_PROJECAO_ID = "1vLQuPR0Mss1GPP3iU3wCcUtaXe69wqKk-U4XWBjjSpM";
     const SHEET_RANGE = "Página1!A:G"; // Aba e colunas onde estão: Data, Tipo, Valor, Descrição, Projeto, Conta Bancária, Data Lançamento
+    
+    const SHEET_PROJECAO_ID = "1vLQuPR0Mss1GPP3iU3wCcUtaXe69wqKk-U4XWBjjSpM";
     const SHEET_PROJECAO_RANGE = "Página1!A:B";
+    
+    const SHEET_PROJETOS_LUCRO_ID = "1auAB0FHrFk0YHTxsvblF1zZJXnG2SvlhqIn_6MZxoxE";
+    const SHEET_PROJETOS_LUCRO_RANGE = "Página1!A:B";
 
     const DISCOVERY_DOC = "https://sheets.googleapis.com/$discovery/rest?version=v4";
     const SCOPES        = "https://www.googleapis.com/auth/spreadsheets.readonly";
@@ -360,6 +418,7 @@ table {
   
   let projecaoSeries = [];          // { data, valor } vindo da 2ª planilha
   let projecaoChartInstance = null; // instância do Chart.js na aba Projeção
+  let projecoesProjetos = {}; // { [projeto]: lucroProjetado }
 
   /********************************************
    * FUNÇÕES DE UI (BOTÃO + CONTEÚDO)
@@ -655,8 +714,6 @@ table {
   });
 
   processarDados(rows);
-  popularFiltros();
-  atualizarVisualizacao();  // isso já chama atualizarGraficoProjetos() por dentro
 
   // 2) Planilha de projeção (Data, Balanço)
   projecaoSeries = [];
@@ -696,8 +753,47 @@ table {
     }
   }
 
-  // 3) Atualiza o gráfico da aba Projeção
+ // 3) Planilha de projeção de lucro por projeto (Projeto, Lucro)
+  projecoesProjetos = {};
+  if (SHEET_PROJETOS_LUCRO_ID && SHEET_PROJETOS_LUCRO_RANGE) {
+    try {
+      const respProjProj = await gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId: SHEET_PROJETOS_LUCRO_ID,
+        range: SHEET_PROJETOS_LUCRO_RANGE,
+      });
+
+      const vals3 = respProjProj.result.values || [];
+      if (vals3.length > 1) {
+        const header3 = vals3[0];
+        const idxProj  = header3.indexOf("Projeto");
+        const idxLucro = header3.indexOf("Lucro");
+
+        if (idxProj !== -1 && idxLucro !== -1) {
+          vals3.slice(1).forEach(row => {
+            const projetoRaw = (row[idxProj] || "").toString().trim();
+            let lucroStr     = (row[idxLucro] || "").toString().trim();
+            if (!projetoRaw || !lucroStr) return;
+
+            lucroStr = lucroStr.replace(/\./g, "").replace(",", ".");
+            const lucro = parseFloat(lucroStr);
+            if (isNaN(lucro)) return;
+
+            projecoesProjetos[projetoRaw] = lucro;
+          });
+        }
+      }
+    } catch (err) {
+      console.warn("Não foi possível carregar projeção de lucro por projeto:", err);
+      projecoesProjetos = {};
+    }
+  }
+
+  // 4) Atualiza gráfico de Projeção (já existia)
   atualizarGraficoProjecao();
+  atualizarGraficoProjetos();
+
+  popularFiltros();
+  atualizarVisualizacao();
 }
 
   /********************************************
@@ -889,86 +985,96 @@ function aplicarFiltrosCombinados(dados, filtroProjetoConta, filtroAno) {
   }
 
 
-function atualizarVisualizacao() {
-  const filterSelect = document.getElementById("filter");        // projeto/conta
-  const filterAnoSelect = document.getElementById("filter-ano"); // ano
+  function atualizarVisualizacao() {
+    const filterSelect = document.getElementById("filter");        // projeto/conta
+    const filterAnoSelect = document.getElementById("filter-ano"); // ano
 
-  const filtroProjetoConta = filterSelect ? filterSelect.value : "";
-  const filtroAno = filterAnoSelect ? filterAnoSelect.value : "";
+    const filtroProjetoConta = filterSelect ? filterSelect.value : "";
+    const filtroAno = filterAnoSelect ? filterAnoSelect.value : "";
 
-  const entradasFiltradas = aplicarFiltrosCombinados(entradas, filtroProjetoConta, filtroAno);
-  const saidasFiltradas   = aplicarFiltrosCombinados(saidas,   filtroProjetoConta, filtroAno);
+    const entradasFiltradas = aplicarFiltrosCombinados(entradas, filtroProjetoConta, filtroAno);
+    const saidasFiltradas   = aplicarFiltrosCombinados(saidas,   filtroProjetoConta, filtroAno);
 
-  const totalEntradas = renderizarTabela("entradas", entradasFiltradas);
-  const totalSaidas   = renderizarTabela("saidas", saidasFiltradas);
+    const totalEntradas = renderizarTabela("entradas", entradasFiltradas);
+    const totalSaidas   = renderizarTabela("saidas", saidasFiltradas);
 
-  const balanco = totalEntradas - totalSaidas;
+    const balanco = totalEntradas - totalSaidas;
 
-  const balanceElement = document.getElementById("balance");
-  if (balanceElement) {
-    balanceElement.textContent = formatarValor(balanco);
-    balanceElement.classList.remove("valor-positivo", "valor-negativo");
-    balanceElement.classList.add(balanco >= 0 ? "valor-positivo" : "valor-negativo");
+    const balanceElement = document.getElementById("balance");
+    if (balanceElement) {
+      balanceElement.textContent = formatarValor(balanco);
+      balanceElement.classList.remove("valor-positivo", "valor-negativo");
+      balanceElement.classList.add(balanco >= 0 ? "valor-positivo" : "valor-negativo");
+    }
+
+    // Atualiza também o gráfico de projetos com os mesmos filtros
+    atualizarGraficoProjetos();
+    atualizarGraficoProjecao();
   }
 
-  // Atualiza também o gráfico de projetos com os mesmos filtros
-  atualizarGraficoProjetos();
-  atualizarGraficoProjecao();
-}
 
 
 
+  function popularFiltros() {
+    const filterSelect = document.getElementById("filter");        // projeto/conta
+    const filterAnoSelect = document.getElementById("filter-ano"); // ano
 
-function popularFiltros() {
-  const filterSelect = document.getElementById("filter");       // projeto/conta
-  const filterAnoSelect = document.getElementById("filter-ano"); // ano
+    const todos = [...entradas, ...saidas];
 
-  const todos = [...entradas, ...saidas];
+    // ----- Filtro projeto/conta -----
+    if (filterSelect) {
+      filterSelect.innerHTML = '<option value="">Todos</option>';
 
-  // ----- Filtro projeto/conta -----
-  if (filterSelect) {
-    filterSelect.innerHTML = '<option value="">Todos</option>';
+      // projetos vindos do fluxo real
+      const projetosSet = new Set(todos.map(i => i.projeto).filter(Boolean));
 
-    const projetos = [...new Set(todos.map(i => i.projeto).filter(Boolean))].sort();
-    const contas   = [...new Set(todos.map(i => i.conta).filter(Boolean))].sort();
+      // inclui também projetos que existem só na planilha de projeções
+      if (projecoesProjetos) {
+        Object.keys(projecoesProjetos).forEach(p => {
+          if (p) projetosSet.add(p);
+        });
+      }
 
-    projetos.forEach(projeto => {
-      const option = document.createElement("option");
-      option.value = `projeto:${projeto}`;
-      option.textContent = `Projeto: ${projeto}`;
-      filterSelect.appendChild(option);
-    });
+      const projetos = [...projetosSet].sort();
+      const contas   = [...new Set(todos.map(i => i.conta).filter(Boolean))].sort();
 
-    contas.forEach(conta => {
-      const option = document.createElement("option");
-      option.value = `conta:${conta}`;
-      option.textContent = `Conta: ${conta}`;
-      filterSelect.appendChild(option);
-    });
+      projetos.forEach(projeto => {
+        const option = document.createElement("option");
+        option.value = `projeto:${projeto}`;
+        option.textContent = `Projeto: ${projeto}`;
+        filterSelect.appendChild(option);
+      });
+
+      contas.forEach(conta => {
+        const option = document.createElement("option");
+        option.value = `conta:${conta}`;
+        option.textContent = `Conta: ${conta}`;
+        filterSelect.appendChild(option);
+      });
+    }
+
+    // ----- Filtro ano ----- (mantém igual)
+    if (filterAnoSelect) {
+      filterAnoSelect.innerHTML = '<option value="">Todos</option>';
+
+      const anos = [...new Set(
+        todos
+          .map(i => i.ano)
+          .filter(ano => ano && /^\d{4}$/.test(ano))
+      )].sort((a, b) => b - a);
+
+      anos.forEach(ano => {
+        const option = document.createElement("option");
+        option.value = ano;
+        option.textContent = ano;
+        filterAnoSelect.appendChild(option);
+      });
+    }
   }
-
-  // ----- Filtro ano -----
-  if (filterAnoSelect) {
-    filterAnoSelect.innerHTML = '<option value="">Todos</option>';
-
-    const anos = [...new Set(
-      todos
-        .map(i => i.ano)
-        .filter(ano => ano && /^\d{4}$/.test(ano))
-    )].sort();
-
-    anos.forEach(ano => {
-      const option = document.createElement("option");
-      option.value = ano;
-      option.textContent = ano;
-      filterAnoSelect.appendChild(option);
-    });
-  }
-}
 
   /********************************************
-   * INICIALIZAÇÃO DA UI
-   ********************************************/
+  * INICIALIZAÇÃO DA UI
+  ********************************************/
   function inicializarUI() {
     // Tabs
     document.querySelectorAll(".tab-button").forEach(button => {
@@ -1009,8 +1115,8 @@ function popularFiltros() {
   }
 
   /********************************************
-   * BOOTSTRAP
-   ********************************************/
+  * BOOTSTRAP
+  ********************************************/
   document.addEventListener("DOMContentLoaded", () => {
     domReady = true;
     inicializarUI();
@@ -1025,37 +1131,37 @@ function popularFiltros() {
   let projetosChartInstance = null;
 
 
-function calcularLucroPorProjeto(entradasFonte, saidasFonte) {
-  const mapa = {};
+  function calcularLucroPorProjeto(entradasFonte, saidasFonte) {
+    const mapa = {};
 
-  (entradasFonte || []).forEach(item => {
-    const projeto = item.projeto || "Sem projeto";
-    if (!mapa[projeto]) mapa[projeto] = { entradas: 0, saidas: 0 };
-    mapa[projeto].entradas += item.valor;
-  });
+    (entradasFonte || []).forEach(item => {
+      const projeto = item.projeto || "Sem projeto";
+      if (!mapa[projeto]) mapa[projeto] = { entradas: 0, saidas: 0 };
+      mapa[projeto].entradas += item.valor;
+    });
 
-  (saidasFonte || []).forEach(item => {
-    const projeto = item.projeto || "Sem projeto";
-    if (!mapa[projeto]) mapa[projeto] = { entradas: 0, saidas: 0 };
-    mapa[projeto].saidas += item.valor;
-  });
+    (saidasFonte || []).forEach(item => {
+      const projeto = item.projeto || "Sem projeto";
+      if (!mapa[projeto]) mapa[projeto] = { entradas: 0, saidas: 0 };
+      mapa[projeto].saidas += item.valor;
+    });
 
-  const labels = [];
-  const lucros = [];
+    const labels = [];
+    const lucros = [];
 
-  Object.keys(mapa).forEach(projeto => {
-    const totalEntradas = mapa[projeto].entradas;
-    const totalSaidas   = mapa[projeto].saidas;
-    const lucro         = totalEntradas - totalSaidas;
+    Object.keys(mapa).forEach(projeto => {
+      const totalEntradas = mapa[projeto].entradas;
+      const totalSaidas   = mapa[projeto].saidas;
+      const lucro         = totalEntradas - totalSaidas;
 
-    if (totalEntradas !== 0 || totalSaidas !== 0) {
-      labels.push(projeto);
-      lucros.push(lucro);
-    }
-  });
+      if (totalEntradas !== 0 || totalSaidas !== 0) {
+        labels.push(projeto);
+        lucros.push(lucro);
+      }
+    });
 
-  return { labels, lucros };
-}
+    return { labels, lucros };
+  }
 
 
 
@@ -1084,9 +1190,45 @@ function atualizarGraficoProjetos() {
   const entradasFiltradas = aplicarFiltrosCombinados(entradas, filtroProjetoConta, filtroAno);
   const saidasFiltradas   = aplicarFiltrosCombinados(saidas,   filtroProjetoConta, filtroAno);
 
-  const { labels, lucros } = calcularLucroPorProjeto(entradasFiltradas, saidasFiltradas);
+  // Lucro atual por projeto (já existente)
+  const { labels: labelsAtuais, lucros: lucrosAtuais } = calcularLucroPorProjeto(entradasFiltradas, saidasFiltradas);
 
-  if (!labels.length) {
+  const lucrosAtuaisMap = {};
+  labelsAtuais.forEach((proj, i) => {
+    lucrosAtuaisMap[proj] = lucrosAtuais[i];
+  });
+
+  let todosProjetos;
+
+  // identifica tipo de filtro selecionado (se houver)
+  let tipoFiltro = "";
+  let valorFiltro = "";
+  if (filtroProjetoConta) {
+    [tipoFiltro, valorFiltro] = filtroProjetoConta.split(":");
+  }
+
+  // 1) Filtro por projeto: mostra só esse projeto (se existir em qualquer fonte)
+  if (tipoFiltro === "projeto" && valorFiltro) {
+    const existeAtual = Object.prototype.hasOwnProperty.call(lucrosAtuaisMap, valorFiltro);
+    const existeProj  = projecoesProjetos && Object.prototype.hasOwnProperty.call(projecoesProjetos, valorFiltro);
+
+    todosProjetos = (existeAtual || existeProj) ? [valorFiltro] : [];
+  }
+  // 2) Filtro por conta: usa apenas projetos presentes no lucro atual filtrado
+  else if (tipoFiltro === "conta") {
+    todosProjetos = Object.keys(lucrosAtuaisMap).sort();
+  }
+  // 3) Sem filtro específico: união de atual + projetado
+  else {
+    todosProjetos = Array.from(
+      new Set([
+        ...Object.keys(lucrosAtuaisMap),
+        ...Object.keys(projecoesProjetos || {})
+      ])
+    ).sort();
+  }
+
+  if (!todosProjetos.length) {
     tabProjetos.innerHTML = '<div class="empty-state">Sem dados de projetos para exibir.</div>';
     if (projetosChartInstance) {
       projetosChartInstance.destroy();
@@ -1095,6 +1237,7 @@ function atualizarGraficoProjetos() {
     return;
   }
 
+  // Garante canvas
   let canvas = document.getElementById("projetosChart");
   if (!canvas) {
     tabProjetos.innerHTML = "";
@@ -1108,6 +1251,86 @@ function atualizarGraficoProjetos() {
     tabProjetos.appendChild(wrapper);
   }
 
+  // Monta datasets: maior atrás, menor na frente, cores por tipo
+  const dataMaior = [];
+  const dataMenor = [];
+  const bgMaior   = [];
+  const bgMenor   = [];
+
+  const COR_ATUAL = "#2196F3";
+  const COR_PROJ  = "#FF9800";
+
+  todosProjetos.forEach(projeto => {
+    const hasAtual = Object.prototype.hasOwnProperty.call(lucrosAtuaisMap, projeto);
+    const hasProj  = Object.prototype.hasOwnProperty.call(projecoesProjetos, projeto);
+
+    const lucroAtual = hasAtual ? lucrosAtuaisMap[projeto] : null;
+    const lucroProj  = hasProj  ? projecoesProjetos[projeto] : null;
+
+    // Nenhum dado (não deveria acontecer)
+    if (!hasAtual && !hasProj) {
+      dataMaior.push(null);
+      bgMaior.push("transparent");
+      dataMenor.push(null);
+      bgMenor.push("transparent");
+      return;
+    }
+
+    // Ambos existem -> maior atrás, menor na frente
+    if (hasAtual && hasProj) {
+      const absAtual = Math.abs(lucroAtual);
+      const absProj  = Math.abs(lucroProj);
+
+      let valMaior, valMenor, corMaior, corMenor;
+
+      if (absAtual > absProj) {
+        // Atual maior
+        valMaior = lucroAtual;
+        corMaior = COR_ATUAL;
+
+        valMenor = lucroProj;
+        corMenor = COR_PROJ;
+      } else if (absProj > absAtual) {
+        // Projeção maior
+        valMaior = lucroProj;
+        corMaior = COR_PROJ;
+
+        valMenor = lucroAtual;
+        corMenor = COR_ATUAL;
+      } else {
+        // Iguais -> critério fixo:
+        // atual = barra de trás (mais larga), projeção = barra da frente (mais estreita)
+        valMaior = lucroProj;
+        corMaior = COR_PROJ;
+
+        valMenor = lucroAtual;
+        corMenor = COR_ATUAL;
+      }
+
+      dataMaior.push(valMaior);
+      bgMaior.push(corMaior);
+
+      dataMenor.push(valMenor);
+      bgMenor.push(corMenor);
+    }
+    // Só atual
+    else if (hasAtual) {
+      dataMaior.push(null);
+      bgMaior.push("transparent");
+      dataMenor.push(lucroAtual);
+      bgMenor.push(COR_ATUAL);
+    }
+    // Só projeção
+    else if (hasProj) {
+      dataMaior.push(null);
+      bgMaior.push("transparent");
+      dataMenor.push(lucroProj);
+      bgMenor.push(COR_PROJ);
+    }
+  });
+
+  const smallWidth = window.innerWidth < 480;
+
   loadChartJs(() => {
     const ctx = canvas.getContext("2d");
 
@@ -1118,22 +1341,79 @@ function atualizarGraficoProjetos() {
     projetosChartInstance = new Chart(ctx, {
       type: "bar",
       data: {
-        labels: labels,
-        datasets: [{
-          label: "Lucro por projeto (R$)",
-          data: lucros,
-        }]
+        labels: todosProjetos,
+        datasets: [
+          // Maior valor (sempre atrás)
+          {
+            label: "Maior",
+            data: dataMaior,
+            backgroundColor: bgMaior,
+            borderWidth: 0,
+            grouped: false,      // <- impede barras lado a lado
+            barPercentage: 1.0,    // largura da barra "de fundo"
+            order: 1             // desenha primeiro (fica atrás)
+          },
+          // Menor valor: barra mais estreita e na frente
+          {
+            label: "Menor",
+            data: dataMenor,
+            backgroundColor: bgMenor,
+            borderWidth: 0,
+            grouped: false,      // <- mesma posição no eixo X
+            barPercentage: 0.93,    // mais fina, aparece "dentro" da maior
+            order: 0             // desenha depois (fica na frente)
+          },
+          // Legenda: Lucro atual
+          {
+            label: "Lucro atual",
+            data: [],
+            backgroundColor: COR_ATUAL,
+            borderWidth: 0
+          },
+          // Legenda: Lucro projetado
+          {
+            label: "Lucro projetado",
+            data: [],
+            backgroundColor: COR_PROJ,
+            borderWidth: 0
+          }
+        ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: false },
+          legend: {
+            display: true,
+            labels: {
+              // Só mostra os dois últimos datasets na legenda
+              filter: (legendItem) => legendItem.datasetIndex >= 2
+            }
+          },
           tooltip: {
+            // mostra tooltip só para as barras reais (Maior e Menor),
+            // ignora os datasets usados só pra legenda
+            filter: function(ctx) {
+              return ctx.datasetIndex === 0 || ctx.datasetIndex === 1;
+            },
             callbacks: {
               label: function(context) {
                 const valor = context.parsed.y || 0;
-                return formatarValor(valor);
+
+                // descobre a cor real da barra neste índice
+                let bg = context.dataset.backgroundColor;
+                if (Array.isArray(bg)) {
+                  bg = bg[context.dataIndex];
+                }
+
+                let tipo = "";
+                if (bg === COR_ATUAL) {
+                  tipo = "Lucro atual";
+                } else if (bg === COR_PROJ) {
+                  tipo = "Lucro projetado";
+                }
+
+                return (tipo ? tipo + ": " : "") + formatarValor(valor);
               }
             }
           }
@@ -1148,9 +1428,13 @@ function atualizarGraficoProjetos() {
           y: {
             beginAtZero: true,
             ticks: {
+              display: !smallWidth, // esconde textos do eixo Y se largura < 480
               callback: function(value) {
                 return formatarValor(value);
               }
+            },
+            grid: {
+              display: !smallWidth
             }
           }
         }
@@ -1161,182 +1445,204 @@ function atualizarGraficoProjetos() {
 
 
 
-  function atualizarGraficoProjecao() {
-    const tabProjecao = document.getElementById("tab-projecao");
-    if (!tabProjecao) return;
+function atualizarGraficoProjecao() {
+  const tabProjecao = document.getElementById("tab-projecao");
+  if (!tabProjecao) return;
 
-    if (!projecaoSeries || projecaoSeries.length === 0) {
-      tabProjecao.innerHTML = '<div class="empty-state">Sem dados de projeção para exibir.</div>';
-      if (projecaoChartInstance) {
-        projecaoChartInstance.destroy();
-        projecaoChartInstance = null;
-      }
-      return;
+  if (!projecaoSeries || projecaoSeries.length === 0) {
+    tabProjecao.innerHTML = '<div class="empty-state">Sem dados de projeção para exibir.</div>';
+    if (projecaoChartInstance) {
+      projecaoChartInstance.destroy();
+      projecaoChartInstance = null;
     }
+    return;
+  }
 
-    // --- aplica filtro de ano (a partir do ano selecionado) ---
-    const filterAnoSelect = document.getElementById("filter-ano");
-    const filtroAno = filterAnoSelect ? filterAnoSelect.value : "";
+  // --- aplica filtro de ano (a partir do ano selecionado) ---
+  const filterAnoSelect = document.getElementById("filter-ano");
+  const filtroAno = filterAnoSelect ? filterAnoSelect.value : "";
 
-    let seriesFiltrada = projecaoSeries;
+  let seriesFiltrada = projecaoSeries;
 
-    if (filtroAno) {
-      const anoSel = parseInt(filtroAno, 10);
-      if (!isNaN(anoSel)) {
-        seriesFiltrada = projecaoSeries.filter(p => {
-          const dt = parseDataString(p.data);
-          return dt && dt.getFullYear() >= anoSel; // a partir do ano selecionado
-        });
-      }
+  if (filtroAno) {
+    const anoSel = parseInt(filtroAno, 10);
+    if (!isNaN(anoSel)) {
+      seriesFiltrada = projecaoSeries.filter(p => {
+        const dt = parseDataString(p.data);
+        return dt && dt.getFullYear() >= anoSel;
+      });
     }
+  }
 
-    if (!seriesFiltrada.length) {
-      tabProjecao.innerHTML = '<div class="empty-state">Sem dados de projeção para o ano selecionado.</div>';
-      if (projecaoChartInstance) {
-        projecaoChartInstance.destroy();
-        projecaoChartInstance = null;
-      }
-      return;
+  if (!seriesFiltrada.length) {
+    tabProjecao.innerHTML = '<div class="empty-state">Sem dados de projeção para o ano selecionado.</div>';
+    if (projecaoChartInstance) {
+      projecaoChartInstance.destroy();
+      projecaoChartInstance = null;
     }
+    return;
+  }
 
-    // --- garante container + canvas ---
-    let canvas = document.getElementById("projecaoChart");
-    if (!canvas) {
-      tabProjecao.innerHTML = "";
+  // --- garante container + canvas ---
+  let canvas = document.getElementById("projecaoChart");
+  if (!canvas) {
+    tabProjecao.innerHTML = "";
 
-      const wrapper = document.createElement("div");
-      wrapper.id = "projecaoChartWrapper";
+    const wrapper = document.createElement("div");
+    wrapper.id = "projecaoChartWrapper";
 
-      canvas = document.createElement("canvas");
-      canvas.id = "projecaoChart";
+    canvas = document.createElement("canvas");
+    canvas.id = "projecaoChart";
 
-      wrapper.appendChild(canvas);
-      tabProjecao.appendChild(wrapper);
+    wrapper.appendChild(canvas);
+    tabProjecao.appendChild(wrapper);
+  }
+
+  // --- prepara dados ---
+  const labels  = seriesFiltrada.map(p => p.data);
+  const valores = seriesFiltrada.map(p => p.valor);
+
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+
+  const isFutureFlags = labels.map(dataStr => {
+    const dt = parseDataString(dataStr);
+    return dt && dt > hoje; // futuro = pontilhado
+  });
+
+  // --- breakpoints responsivos para o gráfico ---
+  const smallHeight = window.innerHeight < 480;
+  const smallWidth  = window.innerWidth  < 480;
+
+  loadChartJs(() => {
+    const ctx = canvas.getContext("2d");
+
+    if (projecaoChartInstance) {
+      projecaoChartInstance.destroy();
     }
-
-    // --- monta labels, valores e flags de futuro com base na série filtrada ---
-    const labels  = seriesFiltrada.map(p => p.data);
-    const valores = seriesFiltrada.map(p => p.valor);
-
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-
-    const isFutureFlags = labels.map(dataStr => {
-      const dt = parseDataString(dataStr);
-      return dt && dt > hoje; // ajuste para >= hoje se quiser incluir hoje como projeção
-    });
-
-    loadChartJs(() => {
-      const ctx = canvas.getContext("2d");
-
-      if (projecaoChartInstance) {
-        projecaoChartInstance.destroy();
-      }
 
     projecaoChartInstance = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: labels,
-      datasets: [
-        // Dataset REAL: linha contínua com futuro pontilhado
-        {
-          label: "Balanço",
-          data: valores,
-          borderColor: "#2196F3",
-          backgroundColor: "#2196F3",
-          tension: 0.25,
-          spanGaps: false,
-          pointRadius: 6,
-          pointHoverRadius: 10,
-          segment: {
-            // segmentos cujo ponto final é futuro ficam pontilhados
-            borderDash: ctx => {
-              const idx = ctx.p1DataIndex;
-              return isFutureFlags[idx] ? [5, 5] : undefined;
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [
+          // Dataset REAL: linha única; futuro fica pontilhado
+          {
+            label: "Balanço",
+            data: valores,
+            borderColor: "#2196F3",
+            backgroundColor: "#2196F3",
+            tension: 0.25,
+            spanGaps: false,
+            pointRadius: 6,
+            pointHoverRadius: 10,
+            segment: {
+              borderDash: ctx => {
+                const idx = ctx.p1DataIndex;
+                return isFutureFlags[idx] ? [5, 5] : undefined;
+              }
             }
+          },
+          // LEGEND: Histórico (linha cheia)
+          {
+            label: "Histórico",
+            data: [NaN],
+            borderColor: "#2196F3",
+            borderDash: [],
+            borderWidth: 3,
+            fill: false,
+            pointRadius: 0
+          },
+          // LEGEND: Projeção (pontilhada)
+          {
+            label: "Projeção",
+            data: [NaN],
+            borderColor: "#2196F3",
+            borderDash: [5, 10],
+            borderWidth: 3,
+            fill: false,
+            pointRadius: 0
           }
-        },
-
-        // LEGEND: Histórico (linha contínua)
-        {
-          label: "Histórico",
-          data: [],
-          borderColor: "#2196F3",
-          borderDash: [],
-          borderWidth: 3,
-          pointRadius: 0,
-          fill: false,
-        },
-
-        // LEGEND: Projeção (linha pontilhada)
-        {
-          label: "Projeção",
-          data: [NaN],
-          borderColor: "#2196F3",
-          borderDash: [5, 10],
-          borderWidth: 3,
-          pointRadius: 0,
-          fill: false,
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: true,
-          labels: {
-            filter: (legendItem) => (legendItem.datasetIndex !== 0), // esconde o dataset real da legenda           
-            boxWidth: 40,                  // compr. da "linha" na legenda
-            boxHeight: 0                  // altura pequena = parece só linha
-          }
-        },
-        tooltip: {
-          // mantém tooltip só do dataset real
-          filter: (ctx) => ctx.datasetIndex === 0,
-          callbacks: {
-            title: function(items) {
-              const raw = items[0].label || "";
-              const dt = parseDataString(raw);
-              if (!dt) return raw;
-              const mes = MESES_CURTOS[dt.getMonth()];
-              return `${mes}/${dt.getFullYear()}`;
-            },
-            label: function(context) {
-              const v = context.parsed.y || 0;
-              return formatarValor(v);
-            }
-          }
-        }
+        ]
       },
-      scales: {
-        x: {
-          ticks: {
-            callback: function(value) {
-              const raw = this.getLabelForValue(value);
-              const dt = parseDataString(raw);
-              if (!dt) return raw;
-              const mes = MESES_CURTOS[dt.getMonth()];
-              return `${mes}/${dt.getFullYear()}`;
-            },
-            maxRotation: 45,
-            minRotation: 0,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          // legenda some em telas com pouca altura
+          legend: {
+            display: !smallHeight,
+            labels: {
+              filter: (legendItem) => legendItem.datasetIndex !== 0,
+              boxWidth: 40,
+              boxHeight: 0
+            }
+          },
+          // tooltip só no dataset real
+          tooltip: {
+            filter: (ctx) => ctx.datasetIndex === 0,
+            callbacks: {
+              title: function(items) {
+                const raw = items[0].label || "";
+                const dt = parseDataString(raw);
+                if (!dt) return raw;
+                const mes = MESES_CURTOS[dt.getMonth()];
+                return `${mes}/${dt.getFullYear()}`;
+              },
+              label: function(context) {
+                const v = context.parsed.y || 0;
+                return formatarValor(v);
+              }
+            }
           }
         },
-        y: {
-          beginAtZero: false,
-          ticks: {
-            callback: function(value) {
-              return formatarValor(value);
+        scales: {
+          x: {
+            // esconde textos do eixo X se altura < 480
+            ticks: {
+              display: !smallHeight,
+              callback: function(value) {
+                const raw = this.getLabelForValue(value);
+                const dt = parseDataString(raw);
+                if (!dt) return "";
+                const mes = MESES_CURTOS[dt.getMonth()];
+                return `${mes}/${dt.getFullYear()}`;
+              },
+              maxRotation: 45,
+              minRotation: 0,
+            },
+            grid: {
+              display: !smallHeight
+            }
+          },
+          y: {
+            beginAtZero: false,
+            // esconde textos do eixo Y se largura < 480
+            ticks: {
+              display: !smallWidth,
+              callback: function(value) {
+                return formatarValor(value);
+              }
+            },
+            grid: {
+              display: !smallWidth
             }
           }
         }
       }
-    }
-  });
+    });
   });
 }
+
+
+window.addEventListener("resize", () => {
+  if (projecaoSeries && projecaoSeries.length) {
+    atualizarGraficoProjecao();
+  }
+  if ((entradas && entradas.length) || (saidas && saidas.length)) {
+    atualizarGraficoProjetos();
+  }
+});
 
 
 </script>
